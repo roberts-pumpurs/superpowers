@@ -1,0 +1,166 @@
+From f3c485292fe233b84595ebcdb1818b3b013db42b Mon Sep 17 00:00:00 2001
+From: Roberts Pumpurs <roberts@pumpurlabs.com>
+Date: Thu, 19 Mar 2026 20:36:20 +0200
+Subject: [PATCH] customizations: KISS, no-co-authored-by, research_codebase,
+ rust-engineer routing
+
+---
+ skills/brainstorming/SKILL.md                 | 10 ++++++---
+ skills/requesting-code-review/SKILL.md        |  6 ++++-
+ skills/subagent-driven-development/SKILL.md   | 22 +++++++++++++++++++
+ .../implementer-prompt.md                     |  4 +++-
+ skills/writing-plans/SKILL.md                 | 15 +++++++++----
+ 5 files changed, 48 insertions(+), 9 deletions(-)
+
+diff --git a/skills/brainstorming/SKILL.md b/skills/brainstorming/SKILL.md
+index edbc2b5..6fddaf7 100644
+--- a/skills/brainstorming/SKILL.md
++++ b/skills/brainstorming/SKILL.md
+@@ -114,14 +114,18 @@ digraph brainstorming {
+ - Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+   - (User preferences for spec location override this default)
+ - Use elements-of-style:writing-clearly-and-concisely skill if available
+-- Commit the design document to git
++- Commit the design document to git (never include Co-Authored-By lines in commit messages)
++
++**Rust Projects — Domain Expert Review:**
++For Rust projects, dispatch a `rust-engineer` subagent during the design phase to get architectural feedback. Do this after presenting the design but before writing the spec document. Provide the proposed design and ask for review of: performance implications, async patterns, type system design, memory layout concerns, and idiomatic Rust alternatives. Incorporate the feedback into the spec.
+ 
+ **Spec Review Loop:**
+ After writing the spec document:
+ 
+ 1. Dispatch spec-document-reviewer subagent (see spec-document-reviewer-prompt.md)
+-2. If Issues Found: fix, re-dispatch, repeat until Approved
+-3. If loop exceeds 3 iterations, surface to human for guidance
++2. For Rust projects, also dispatch a `rust-engineer` subagent in parallel to review the spec for Rust-specific concerns (see spec-document-reviewer-prompt.md for template, use `rust-engineer` subagent_type)
++3. If Issues Found: fix, re-dispatch, repeat until Approved
++4. If loop exceeds 3 iterations, surface to human for guidance
+ 
+ **User Review Gate:**
+ After the spec review loop passes, ask the user to review the written spec before proceeding:
+diff --git a/skills/requesting-code-review/SKILL.md b/skills/requesting-code-review/SKILL.md
+index fe7c8d9..190cb99 100644
+--- a/skills/requesting-code-review/SKILL.md
++++ b/skills/requesting-code-review/SKILL.md
+@@ -33,6 +33,10 @@ HEAD_SHA=$(git rev-parse HEAD)
+ 
+ Use Task tool with superpowers:code-reviewer type, fill template at `code-reviewer.md`
+ 
++**3. For Rust projects — dispatch rust-engineer reviewer:**
++
++In addition to the general code-reviewer, dispatch a `rust-engineer` subagent for Rust-specific review. Use the same template but the rust-engineer brings domain expertise on performance, memory safety, async patterns, and idiomatic Rust. Run both reviewers in parallel — they catch different classes of issues.
++
+ **Placeholders:**
+ - `{WHAT_WAS_IMPLEMENTED}` - What you just built
+ - `{PLAN_OR_REQUIREMENTS}` - What it should do
+@@ -40,7 +44,7 @@ Use Task tool with superpowers:code-reviewer type, fill template at `code-review
+ - `{HEAD_SHA}` - Ending commit
+ - `{DESCRIPTION}` - Brief summary
+ 
+-**3. Act on feedback:**
++**4. Act on feedback:**
+ - Fix Critical issues immediately
+ - Fix Important issues before proceeding
+ - Note Minor issues for later
+diff --git a/skills/subagent-driven-development/SKILL.md b/skills/subagent-driven-development/SKILL.md
+index 5150b18..2fc7310 100644
+--- a/skills/subagent-driven-development/SKILL.md
++++ b/skills/subagent-driven-development/SKILL.md
+@@ -99,6 +99,28 @@ Use the least powerful model that can handle each role to conserve cost and incr
+ - Touches multiple files with integration concerns → standard model
+ - Requires design judgment or broad codebase understanding → most capable model
+ 
++## Subagent Type Selection
++
++Choose the appropriate `subagent_type` for agents based on the task's primary language, domain, and role:
++
++**Implementer agents:**
++
++| Domain / Language | subagent_type            |
++|-------------------|--------------------------|
++| Rust              | rust-engineer            |
++| General / other   | general-purpose (default)|
++
++**Architecture and design review agents:**
++
++| Domain / Language | subagent_type              |
++|-------------------|----------------------------|
++| Rust              | rust-engineer              |
++| General / other   | general-purpose (default)  |
++
++Use `rust-engineer` for all Rust tasks — implementation, architecture, design review, performance optimization, and concurrency design. Choose the model based on task complexity (capable model for architecture/design, fast model for mechanical implementation).
++
++**Before implementation:** Dispatch a `research_codebase` command to thoroughly explore existing code patterns, understand best practices, and identify reusable utilities. Implementers should always understand the codebase context before writing new code.
++
+ ## Handling Implementer Status
+ 
+ Implementer subagents report one of four statuses. Handle each appropriately:
+diff --git a/skills/subagent-driven-development/implementer-prompt.md b/skills/subagent-driven-development/implementer-prompt.md
+index 400c103..c0c0452 100644
+--- a/skills/subagent-driven-development/implementer-prompt.md
++++ b/skills/subagent-driven-development/implementer-prompt.md
+@@ -3,11 +3,13 @@
+ Use this template when dispatching an implementer subagent.
+ 
+ ```
+-Task tool (general-purpose):
++Task tool ({subagent_type from Subagent Type Selection table, default: general-purpose}):
+   description: "Implement Task N: [task name]"
+   prompt: |
+     You are implementing Task N: [task name]
+ 
++    **First:** Run `/research_codebase` to understand existing patterns, best practices, and reusable utilities in the codebase before writing any new code.
++
+     ## Task Description
+ 
+     [FULL TEXT of task from plan - paste it here, don't make subagent read file]
+diff --git a/skills/writing-plans/SKILL.md b/skills/writing-plans/SKILL.md
+index 60f9834..544fff3 100644
+--- a/skills/writing-plans/SKILL.md
++++ b/skills/writing-plans/SKILL.md
+@@ -7,7 +7,7 @@ description: Use when you have a spec or requirements for a multi-step task, bef
+ 
+ ## Overview
+ 
+-Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
++Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. KISS. Frequent commits.
+ 
+ Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
+ 
+@@ -101,6 +101,8 @@ Expected: PASS
+ git add tests/path/test.py src/path/file.py
+ git commit -m "feat: add specific feature"
+ ```
++
++**Never include Co-Authored-By lines in commit messages.**
+ ````
+ 
+ ## Remember
+@@ -108,7 +110,11 @@ git commit -m "feat: add specific feature"
+ - Complete code in plan (not "add validation")
+ - Exact commands with expected output
+ - Reference relevant skills with @ syntax
+-- DRY, YAGNI, TDD, frequent commits
++- DRY, YAGNI, TDD, KISS, frequent commits
++- Never include Co-Authored-By lines in commit messages
++- Reuse existing utilities and dependencies before introducing new ones
++- Always run `/research_codebase` before writing a plan to understand existing patterns, best practices, and internet conventions for the problem domain
++- Follow project security guidelines (CLAUDE.md, AGENTS.md) — validate inputs at system boundaries, review OWASP Top 10 and SWC Registry for relevant threat patterns
+ 
+ ## Plan Review Loop
+ 
+@@ -116,8 +122,9 @@ After writing the complete plan:
+ 
+ 1. Dispatch a single plan-document-reviewer subagent (see plan-document-reviewer-prompt.md) with precisely crafted review context — never your session history. This keeps the reviewer focused on the plan, not your thought process.
+    - Provide: path to the plan document, path to spec document
+-2. If ❌ Issues Found: fix the issues, re-dispatch reviewer for the whole plan
+-3. If ✅ Approved: proceed to execution handoff
++2. For Rust projects, also dispatch a `rust-engineer` subagent in parallel to review the plan for Rust-specific concerns — crate boundaries, async patterns, performance-sensitive task ordering, type system design, and whether the plan's abstractions align with idiomatic Rust. Use the plan-document-reviewer-prompt.md template with `rust-engineer` subagent_type.
++3. If ❌ Issues Found: fix the issues, re-dispatch reviewer for the whole plan
++4. If ✅ Approved: proceed to execution handoff
+ 
+ **Review loop guidance:**
+ - Same agent that wrote the plan fixes it (preserves context)
+-- 
+2.53.0
+

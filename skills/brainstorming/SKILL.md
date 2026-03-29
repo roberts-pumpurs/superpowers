@@ -111,7 +111,10 @@ digraph brainstorming {
 - Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
 - Use elements-of-style:writing-clearly-and-concisely skill if available
-- Commit the design document to git
+- Commit the design document to git (never include Co-Authored-By lines in commit messages)
+
+**Rust Projects — Domain Expert Review:**
+For Rust projects, dispatch a `rust-engineer` subagent during the design phase to get architectural feedback. Do this after presenting the design but before writing the spec document. Provide the proposed design and ask for review of: performance implications, async patterns, type system design, memory layout concerns, and idiomatic Rust alternatives. Incorporate the feedback into the spec.
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:

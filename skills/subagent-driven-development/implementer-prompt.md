@@ -3,10 +3,12 @@
 Use this template when dispatching an implementer subagent.
 
 ```
-Task tool (general-purpose):
+Task tool ({subagent_type from Subagent Type Selection table, default: general-purpose}):
   description: "Implement Task N: [task name]"
   prompt: |
     You are implementing Task N: [task name]
+
+    **First:** Run `/research_codebase` to understand existing patterns, best practices, and reusable utilities in the codebase before writing any new code.
 
     ## Task Description
 

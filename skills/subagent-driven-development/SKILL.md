@@ -99,6 +99,28 @@ Use the least powerful model that can handle each role to conserve cost and incr
 - Touches multiple files with integration concerns → standard model
 - Requires design judgment or broad codebase understanding → most capable model
 
+## Subagent Type Selection
+
+Choose the appropriate `subagent_type` for agents based on the task's primary language, domain, and role:
+
+**Implementer agents:**
+
+| Domain / Language | subagent_type            |
+|-------------------|--------------------------|
+| Rust              | rust-engineer            |
+| General / other   | general-purpose (default)|
+
+**Architecture and design review agents:**
+
+| Domain / Language | subagent_type              |
+|-------------------|----------------------------|
+| Rust              | rust-engineer              |
+| General / other   | general-purpose (default)  |
+
+Use `rust-engineer` for all Rust tasks — implementation, architecture, design review, performance optimization, and concurrency design. Choose the model based on task complexity (capable model for architecture/design, fast model for mechanical implementation).
+
+**Before implementation:** Dispatch a `research_codebase` command to thoroughly explore existing code patterns, understand best practices, and identify reusable utilities. Implementers should always understand the codebase context before writing new code.
+
 ## Handling Implementer Status
 
 Implementer subagents report one of four statuses. Handle each appropriately:

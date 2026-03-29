@@ -33,6 +33,10 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 Use Task tool with superpowers:code-reviewer type, fill template at `code-reviewer.md`
 
+**3. For Rust projects — dispatch rust-engineer reviewer:**
+
+In addition to the general code-reviewer, dispatch a `rust-engineer` subagent for Rust-specific review. Use the same template but the rust-engineer brings domain expertise on performance, memory safety, async patterns, and idiomatic Rust. Run both reviewers in parallel — they catch different classes of issues.
+
 **Placeholders:**
 - `{WHAT_WAS_IMPLEMENTED}` - What you just built
 - `{PLAN_OR_REQUIREMENTS}` - What it should do
@@ -40,7 +44,7 @@ Use Task tool with superpowers:code-reviewer type, fill template at `code-review
 - `{HEAD_SHA}` - Ending commit
 - `{DESCRIPTION}` - Brief summary
 
-**3. Act on feedback:**
+**4. Act on feedback:**
 - Fix Critical issues immediately
 - Fix Important issues before proceeding
 - Note Minor issues for later

@@ -7,7 +7,7 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 ## Overview
 
-Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. KISS. Frequent commits.
 
 Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
 
@@ -101,6 +101,8 @@ Expected: PASS
 git add tests/path/test.py src/path/file.py
 git commit -m "feat: add specific feature"
 ```
+
+**Never include Co-Authored-By lines in commit messages.**
 ````
 
 ## No Placeholders
@@ -117,7 +119,11 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
-- DRY, YAGNI, TDD, frequent commits
+- DRY, YAGNI, TDD, KISS, frequent commits
+- Never include Co-Authored-By lines in commit messages
+- Reuse existing utilities and dependencies before introducing new ones
+- Always run `/research_codebase` before writing a plan to understand existing patterns, best practices, and internet conventions for the problem domain
+- Follow project security guidelines (CLAUDE.md, AGENTS.md) — validate inputs at system boundaries, review OWASP Top 10 and SWC Registry for relevant threat patterns
 
 ## Self-Review
 
@@ -128,6 +134,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 **2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+
+**4. Rust projects:** Review crate boundaries, async patterns, performance-sensitive task ordering, type system design, and whether the plan's abstractions align with idiomatic Rust. Dispatch a `rust-engineer` subagent for a second opinion if the plan involves non-trivial Rust architecture.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
